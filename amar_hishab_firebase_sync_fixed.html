@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>আমার হিসাব - অগ্রণী ব্যাংক থিম (শতভাগ ফিক্সড)</title>
+    <style>
+        :root {
+            --primary: #025732; /* অগ্রণী ব্যাংক ডিপ ফরেস্ট গ্রিন */
+            --primary-dark: #013a21;
+            --accent: #e5a93b; /* অগ্রণী ব্যাংক গোল্ডেন লাহা */
+            --success: #16a34a;
+            --danger: #dc2626;
+            --background: #f1f5f9;
+            --surface: #ffffff;
+            --text: #0f172a;
+            --text-light: #64748b;
+            --border: #cbd5e1;
+            --bkash: #e2136e;
+            --nagad: #f6921e;
+            --bank: #025732;
+            --fund: #8b5cf6;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--background); color: var(--text); padding-bottom: 80px; }
+        
+        /* লক স্ক্রিন ১০০% ফিক্সড ওভারলে */
+        #lock-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            display: flex; justify-content: center; align-items: center; z-index: 999999 !important;
+        }
+        .lock-box {
+            background: var(--surface); padding: 30px; border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3); width: 90%; max-width: 360px; text-align: center;
+            border-top: 5px solid var(--accent);
+        }
+        .lock-box h3 { margin-bottom: 20px; color: var(--primary); font-weight: bold; }
+        .lock-box input { margin-bottom: 15px; text-align: center; font-size: 18px; letter-spacing: 5px; width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 6px; outline: none; }
+        .lock-box button { width: 100%; padding: 12px; background-color: var(--primary); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }        /* Main Layout */
+        .header {
+            background-color: var(--primary); color: white; padding: 10px 15px;
+            position: sticky; top: 0; z-index: 100; display: flex;
+            justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-bottom: 3px solid var(--accent);
+        }
+        .header-left-box { display: flex; align-items: center; gap: 10px; }
+        .app-logo-container { width: 38px; height: 38px; border-radius: 50%; overflow: hidden; background: #fff; display: flex; justify-content: center; align-items: center; border: 2px solid var(--accent); cursor: pointer; }
+        .app-logo-container img { width: 100%; height: 100%; object-fit: cover; }
+        .app-logo-placeholder { font-size: 18px; color: var(--primary); font-weight: bold; }
+        .header-title-box { display: flex; flex-direction: column; gap: 1px; }
+        .welcome-text { font-size: 11px; color: var(--accent); font-weight: 500; }
+        
+        .logout-mini-btn { background: var(--danger); color: white; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 14px; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-top: 0; }
+        
+        .container { padding: 15px; max-width: 650px; margin: 0 auto; }
+        .page { display: none; }
+        .page.active { display: block; }
+        
+        .main-balance-card { background: linear-gradient(135deg, var(--primary), #037543); color: white; border-radius: 12px; padding: 20px; margin-bottom: 15px; text-align: center; border-bottom: 4px solid var(--accent); }
+        .main-balance-title { font-size: 14px; opacity: 0.9; margin-bottom: 5px; }
+        .main-balance-amount { font-size: 28px; font-weight: bold; }
+        
+        .grid-vertical { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
+        .sub-card { background: var(--surface); border-radius: 10px; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); }
+        .sub-card-title { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; color: #334155; }
+        .sub-card-amount { font-size: 15px; font-weight: bold; }        .c-fund { border-left: 5px solid var(--fund); }
+        .c-nagad { border-left: 5px solid var(--nagad); }
+        .c-bank { border-left: 5px solid var(--bank); }
+        .c-bkash { border-left: 5px solid var(--bkash); }
+        .c-paonadar { border-left: 5px solid var(--accent); }
+        .c-member { border-left: 5px solid var(--primary); }
+        
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .month-card { background: var(--surface); border-radius: 10px; padding: 15px; text-align: center; border: 1px solid var(--border); }
+        .month-title { font-size: 13px; color: var(--text-light); margin-bottom: 5px; }
+        .month-amount { font-size: 18px; font-weight: bold; }
+        
+        .rem-month-card { background: var(--surface); border-radius: 10px; padding: 12px; text-align: center; border: 1px solid var(--border); margin-bottom: 15px; border-bottom: 4px solid var(--primary); }
+        
+        .tab-menu { display: flex; gap: 5px; margin-bottom: 15px; background: #e2e8f0; padding: 4px; border-radius: 8px; }
+        .tab-btn { flex: 1; padding: 8px; border: none; background: transparent; color: #475569; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 13px; margin-top: 0; }
+        .tab-btn.active { background: var(--primary); color: white; }
+        
+        .card { background: var(--surface); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid var(--border); }
+        .card h3 { color: var(--primary); font-size: 15px; margin-bottom: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; }
+        
+        .table-responsive { width: 100%; overflow-x: auto; margin-top: 5px; border-radius: 6px; border: 1px solid var(--border); }
+        .data-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; min-width: 500px; }
+        .data-table th { background-color: #f8fafc; color: #1e293b; font-weight: 600; padding: 10px 8px; border-bottom: 2px solid var(--border); text-align: center; }
+        .data-table td { padding: 10px 8px; border-bottom: 1px solid #e2e8f0; color: #334155; text-align: center; vertical-align: middle; }
+        .data-table tr:nth-child(even) { background-color: #f8fafc; }
+        
+        .form-group { margin-bottom: 12px; }
+        label { display: block; font-size: 13px; margin-bottom: 5px; font-weight: 600; color: #475569; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; outline: none; font-size: 14px; background-color: #f8fafc; }
+        
+        button { width: 100%; padding: 12px; background-color: var(--primary); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 5px; }
+        .delete-icon-btn { background: none !important; color: var(--danger) !important; border: none !important; cursor: pointer !important; font-weight: bold !important; font-size: 16px !important; padding: 4px 8px !important; width: auto !important; margin: 0 !important; display: inline-block !important; }
+        
+        .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); display: flex; justify-content: space-around; border-top: 2px solid var(--accent); padding: 8px 0; z-index: 1000; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 11px; color: var(--text-light); cursor: pointer; flex: 1; }
+        .nav-item.active { color: var(--primary); font-weight: bold; }
+        .nav-icon { font-size: 20px; margin-bottom: 2px; }
+        
+        .more-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .more-box { background: var(--surface); padding: 20px; border-radius: 10px; text-align: center; border: 1px solid var(--border); cursor: pointer; font-weight: bold; color: var(--primary); }
+        .modal-sub { display: none; }
+        .back-btn { background: #64748b; margin-bottom: 15px; width: auto; padding: 8px 15px; margin-top: 0; }
+    </style>
+</head>
+<body>    <!-- ১০০% ফিক্সড লক স্ক্রিন কাঠামো -->
+    <div id="lock-screen">
+        <div class="lock-box">
+            <h3>🔐 আমার হিসাব লক</h3>
+            <input type="password" id="pin-input" placeholder="পাসওয়ার্ড লিখুন" autocomplete="off">
+            <button type="button" onclick="checkPin()">লগইন করুন</button>
+            <button type="button" onclick="forceResetPin()" style="background:#64748b; margin-top:10px; padding:6px; font-size:11px;">⚠️ লক রিসেট করুন</button>
+        </div>
+    </div>
+
+    <!-- টপ হেডার বার -->
+    <div class="header">
+        <div class="header-left-box">
+            <div class="app-logo-container" onclick="triggerLogoUpload()" title="লোগো পরিবর্তন করুন">
+                <img id="app-logo-img" src="" style="display:none;" />
+                <div id="app-logo-placeholder" class="app-logo-placeholder">🏦</div>
+            </div>
+            <div class="header-title-box">
+                <h2 style="font-size: 17px;">আমার হিসাব</h2>
+                <span class="welcome-text">স্বাগতম, শফিকুল ইসলাম</span>
+            </div>
+        </div>
+        <input type="file" id="logo-file-input" accept="image/*" style="display:none;" onchange="handleLogoChange(event)">
+        <button class="logout-mini-btn" type="button" onclick="logout()" title="লগ আউট">📴</button>
+    </div>
+
+    <div class="container">
+        <!-- হোম পেজ -->
+        <div id="page-home" class="page active">
+            <div class="main-balance-card">
+                <div class="main-balance-title">আমার মোট ব্যালেন্স</div>
+                <div class="main-balance-amount" id="main-balance">৳ 0</div>
+            </div>
+            
+            <div class="grid-vertical">
+                <div class="sub-card c-fund"><div class="sub-card-title">💰 ফান্ড ব্যালেন্স</div><div class="sub-card-amount" id="b-fund">৳ 0</div></div>
+                <div class="sub-card c-nagad"><div class="sub-card-title">📱 নগদ ব্যালেন্স</div><div class="sub-card-amount" id="b-nagad">৳ 0</div></div>
+                <div class="sub-card c-bank"><div class="sub-card-title">🏦 ব্যাংক ব্যালেন্স</div><div class="sub-card-amount" id="b-bank">৳ 0</div></div>
+                <div class="sub-card c-bkash"><div class="sub-card-title">💸 বিকাশ ব্যালেন্স</div><div class="sub-card-amount" id="b-bkash">৳ 0</div></div>
+                <div class="sub-card c-paonadar"><div class="sub-card-title">🤝 মোট পাওনাদার</div><div class="sub-card-amount" id="total-paonadar">৳ 0</div></div>
+                <div class="sub-card c-member"><div class="sub-card-title">👥 মোট সদস্য</div><div class="sub-card-amount" id="total-members">0 জন</div></div>
+            </div>
+            
+            <div class="grid-2">
+                <div class="month-card" style="border-bottom: 4px solid var(--success);">
+                    <div class="month-title">এই মাসে জমা</div>
+                    <div class="month-amount" style="color:var(--success)" id="m-income">৳ 0</div>
+                </div>
+                <div class="month-card" style="border-bottom: 4px solid var(--danger);">
+                    <div class="month-title">এই মাসে খরচ</div>
+                    <div class="month-amount" style="color:var(--danger)" id="m-expense">৳ 0</div>
+                </div>
+            </div>
+
+            <div class="rem-month-card">
+                <div class="month-title" style="font-weight: 600;">📊 এই মাসের অবশিষ্ট ব্যালেন্স</div>
+                <div class="month-amount" style="color: var(--primary); font-size: 20px;" id="m-remaining">৳ 0</div>
+            </div>
+
+            <div class="card">
+                <h3>📋 সাম্প্রতিক জমা ও খরচ তালিকা</h3>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th style="width:8%;">নং</th>
+                                <th>বিবরণ/বাবদ</th>
+                                <th>তারিখ</th>
+                                <th>মাধ্যম</th>
+                                <th>টাকা</th>
+                                <th style="width:10%;">মুছুন</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-recent-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>        <!-- জমা পেজ -->
+        <div id="page-income" class="page">
+            <div class="card">
+                <h3>📥 নতুন জমা এন্ট্রি</h3>
+                <form id="income-form" onsubmit="saveTransaction(event, 'income')">
+                    <div class="form-group"><label>তারিখ নির্ধারণ করুন</label><input type="date" id="inc-date" required></div>
+                    <div class="form-group">
+                        <label>টাকা জমা হওয়ার মাধ্যম</label>
+                        <select id="inc-method">
+                            <option value="fund">ক্যাশ ফান্ড</option>
+                            <option value="nagad">নগদ ওয়ালেট</option>
+                            <option value="bank">ব্যাংক একাউন্ট</option>
+                            <option value="bkash">বিকাশ ওয়ালেট</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>টাকার পরিমাণ</label><input type="number" id="inc-amount" required placeholder="0"></div>
+                    <div class="form-group"><label>বাবদ/বিবরণ</label><input type="text" id="inc-note" required placeholder="যেমন: ব্যবসার লভ্যাংশ"></div>
+                    <button type="submit">জমা নিশ্চিত করুন</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- খরচ পেজ -->
+        <div id="page-expense" class="page">
+            <div class="card">
+                <h3>📤 নতুন খরচ এন্ট্রি</h3>
+                <form id="expense-form" onsubmit="saveTransaction(event, 'expense')">
+                    <div class="form-group"><label>তারিখ নির্ধারণ করুন</label><input type="date" id="exp-date" required></div>
+                    <div class="form-group">
+                        <label>টাকা খরচের মাধ্যম</label>
+                        <select id="exp-method">
+                            <option value="fund">ক্যাশ ফান্ড</option>
+                            <option value="nagad">নগদ ওয়ালেট</option>
+                            <option value="bank">ব্যাংক একাউন্ট</option>
+                            <option value="bkash">বিকাশ ওয়ালেট</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>টাকার পরিমাণ</label><input type="number" id="exp-amount" required placeholder="0"></div>
+                    <div class="form-group"><label>খরচের বিবরণ</label><input type="text" id="exp-note" required placeholder="যেমন: বাজার খরচ"></div>
+                    <button type="submit" class="danger">খরচ নিশ্চিত করুন</button>
+                </form>
+            </div>
+        </div>        <!-- আরোও মেনু অপশনসমূহ -->
+        <div id="page-more" class="page">
+            <div id="more-main-menu" class="more-grid">
+                <div class="more-box" onclick="showSubSection('sec-add-member')">👥 নতুন সদস্য যোগ</div>
+                <div class="more-box" onclick="showSubSection('sec-member-list')">📋 সদস্য তালিকা</div>
+                <div class="more-box" onclick="showSubSection('sec-statement')">📊 ফিল্টার স্টেটমেন্ট</div>
+                <div class="more-box" onclick="showSubSection('sec-note')">📝 আমার নোট</div>
+                <div class="more-box" onclick="showSubSection('sec-password')" style="grid-column: span 2;">🔐 পাসওয়ার্ড পরিবর্তন</div>
+            </div>
+
+            <!-- সদস্য যোগ -->
+            <div id="sec-add-member" class="modal-sub">
+                <button class="back-btn" type="button" onclick="closeSubSection()">← ফিরে যান</button>
+                <div class="card">
+                    <h3>👥 নতুন সদস্য যোগ করুন</h3>
+                    <form id="member-form" onsubmit="saveMember(event)">
+                        <div class="form-group"><label>যোগ করার তারিখ</label><input type="date" id="m-date" required></div>
+                        <div class="form-group"><label>সদস্যের নাম</label><input type="text" id="m-name" required></div>
+                        <div class="form-group"><label>পিতার নাম</label><input type="text" id="m-father"></div>
+                        <div class="form-group"><label>মোবাইল নাম্বার</label><input type="text" id="m-phone"></div>
+                        <div class="form-group"><label>ঠিকানা</label><input type="text" id="m-address" required placeholder="যেমন: গৌরীপুর"></div>
+                        <div class="form-group"><label>দর (Rate)</label><input type="number" id="m-rate" placeholder="যেমন: 400" required></div>
+                        <div class="form-group"><label>টাকার পরিমাণ</label><input type="number" id="m-amount" required placeholder="0"></div>
+                        <button type="submit">সদস্য তালিকায় যোগ করুন</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- সদস্য তালিকা -->
+            <div id="sec-member-list" class="modal-sub">
+                <button class="back-btn" type="button" onclick="closeSubSection()">← ফিরে যান</button>
+                <div class="card">
+                    <h3>📋 নিবন্ধিত সদস্য তালিকা</h3>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th style="width:6%;">নং</th>
+                                    <th>তারিখ</th>
+                                    <th>নাম ও পিতা</th>
+                                    <th>ঠিকানা ও মোবাইল</th>
+                                    <th>দর</th>
+                                    <th>টাকা</th>
+                                    <th style="width:8%;">মুছুন</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-member-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>            <!-- ফিল্টার স্টেটমেন্ট -->
+            <div id="sec-statement" class="modal-sub">
+                <button class="back-btn" type="button" onclick="closeSubSection()">← ফিরে যান</button>
+                <div class="tab-menu">
+                    <button class="tab-btn active" id="tab-daily" type="button" onclick="changeStatementFilter('daily')">দৈনিক</button>
+                    <button class="tab-btn" id="tab-monthly" type="button" onclick="changeStatementFilter('monthly')">মাসিক</button>
+                    <button class="tab-btn" id="tab-yearly" type="button" onclick="changeStatementFilter('yearly')">বাৎসরিক</button>
+                </div>
+                <div class="card">
+                    <h3 id="statement-title">📊 বিস্তারিত দৈনিক স্টেটমেন্ট</h3>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th style="width:8%;">নং</th>
+                                    <th>বিবরণ/খাত</th>
+                                    <th>তারিখ/সময়কাল</th>
+                                    <th>মাধ্যম</th>
+                                    <th>টাকার পরিমাণ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-statement-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- আমার নোট -->
+            <div id="sec-note" class="modal-sub">
+                <button class="back-btn" type="button" onclick="closeSubSection()">← ফিরে যান</button>
+                <div class="card">
+                    <h3>📝 আমার ব্যক্তিগত নোট</h3>
+                    <div class="form-group">
+                        <textarea id="app-personal-note" rows="10" placeholder="এখানে তথ্য লিখুন..." oninput="savePersonalNote()"></textarea>
+                    </div>
+                    <p style="font-size: 11px; color: var(--success); font-weight: bold; text-align: center;">✓ এটি টাইপ করার সাথে সাথেই অটো সেভ হয়ে যায়।</p>
+                </div>
+            </div>
+
+            <!-- পাসওয়ার্ড পরিবর্তন -->
+            <div id="sec-password" class="modal-sub">
+                <button class="back-btn" type="button" onclick="closeSubSection()">← ফিরে যান</button>
+                <div class="card">
+                    <h3>🔐 পাসওয়ার্ড পরিবর্তন করুন</h3>
+                    <div class="form-group"><label>নতুন পাসওয়ার্ড লিখুন</label><input type="password" id="new-pin" placeholder="যেমন: 7788"></div>
+                    <button type="button" onclick="updatePin()">পাসওয়ার্ড আপডেট করুন</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- বটম নেভিগেশন বার -->
+    <div class="nav-bar">
+        <div class="nav-item active" id="btn-home" onclick="switchPage('home')"><span class="nav-icon">🏠</span>হোম</div>
+        <div class="nav-item" id="btn-income" onclick="switchPage('income')"><span class="nav-icon">📥</span>জমা</div>
+        <div class="nav-item" id="btn-expense" onclick="switchPage('expense')"><span class="nav-icon">📤</span>খরচ</div>
+        <div class="nav-item" id="btn-more" onclick="switchPage('more')"><span class="nav-icon">➕</span>আরোও</div>
+    </div>
+
+    <script>
+        // সুরক্ষিত লোকাল ডাটাবেস ইনিশিয়ালাইজেশন
+        let appData;
+        try { appData = JSON.parse(localStorage.getItem('amar_hisab_db')) || null; }
+        catch (error) { appData = null; }
+        appData = appData || {
+            pin: "7788",
+            transactions: [],
+            members: [],
+            logo: "",
+            personalNote: ""
+        };
+
+        // ব্রাউজার ক্যাশ ওভাররাইড ফিক্স লজিক (১০০% ফিক্সড লক ট্রিগার)
+        if (!appData.pin || appData.pin.trim() === "" || appData.pin === "undefined" || appData.pin === "1234") {
+            appData.pin = "7788";
+            localStorage.setItem('amar_hisab_db', JSON.stringify(appData));
+        }
+
+        let currentFilter = "daily"; 
+
+        function setDefaultDates() {
+            const today = new Date().toISOString().split('T');
+            if(document.getElementById('inc-date')) document.getElementById('inc-date').value = today;
+            if(document.getElementById('exp-date')) document.getElementById('exp-date').value = today;
+            if(document.getElementById('m-date')) document.getElementById('m-date').value = today;
+        }
+
+        window.onload = function() {
+            setDefaultDates();
+            loadSavedLogo();
+            loadPersonalNote();
+            updateDashboard();
+        };
+
+        function triggerLogoUpload() { document.getElementById('logo-file-input').click(); }
+
+        function handleLogoChange(event) {
+            const file = event.target.files;
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    appData.logo = e.target.result;
+                    saveData();
+                    renderLogo(e.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function loadSavedLogo() { if (appData.logo) renderLogo(appData.logo); }
+        function renderLogo(base64Data) {
+            const imgElement = document.getElementById('app-logo-img');
+            const placeholder = document.getElementById('app-logo-placeholder');
+            if(imgElement && placeholder) {
+                imgElement.src = base64Data; imgElement.style.display = 'block'; placeholder.style.display = 'none';
+            }
+        }
+
+        function savePersonalNote() {
+            appData.personalNote = document.getElementById('app-personal-note').value;
+            localStorage.setItem('amar_hisab_db', JSON.stringify(appData));
+        }
+
+        function loadPersonalNote() {
+            if(document.getElementById('app-personal-note') && appData.personalNote) {
+                document.getElementById('app-personal-note').value = appData.personalNote;
+            }
+        }
+
+        function checkPin() {
+            const userInput = document.getElementById('pin-input').value.trim();
+            if (userInput === appData.pin.toString().trim()) { 
+                document.getElementById('lock-screen').style.display = 'none'; 
+            } else { 
+                alert('ভুল পাসওয়ার্ড! সঠিক ডিফল্ট পিন "7788" দিয়ে চেষ্টা করুন।'); 
+            }
+            document.getElementById('pin-input').value = '';
+        }
+
+        function forceResetPin() {
+            if(confirm('আপনার অ্যাপের পিন লকটি কি ডিফল্ট "7788"-এ রিসেট করতে চান?')) {
+                appData.pin = "7788";
+                localStorage.setItem('amar_hisab_db', JSON.stringify(appData));
+                alert('রিসেট সফল! এখন পিন বক্সে 7788 লিখে লগইন করুন।');
+            }
+        }
+
+        function logout() { document.getElementById('lock-screen').style.display = 'flex'; }        function updatePin() {
+            const newPin = document.getElementById('new-pin').value.trim();
+            if(newPin.length >= 4) {
+                appData.pin = newPin; saveData(); alert('পাসওয়ার্ড সফলভাবে পরিবর্তন হয়েছে!'); closeSubSection();
+            } else { alert('পাসওয়ার্ড ন্যূনতম ৪ অক্ষরের হতে হবে।'); }
+            document.getElementById('new-pin').value = '';
+        }
+
+        function saveData() {
+            localStorage.setItem('amar_hisab_db', JSON.stringify(appData));
+            updateDashboard();
+        }
+
+        function switchPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById('page-' + pageId).classList.add('active');
+            document.getElementById('btn-' + pageId).classList.add('active');
+            if(pageId === 'more') closeSubSection();
+            setDefaultDates();
+        }
+
+        function showSubSection(secId) {
+            document.getElementById('more-main-menu').style.display = 'none';
+            document.querySelectorAll('.modal-sub').forEach(s => s.style.display = 'none');
+            document.getElementById(secId).style.display = 'block';
+            if(secId === 'sec-statement') renderFilteredStatement();
+        }
+
+        function closeSubSection() {
+            document.querySelectorAll('.modal-sub').forEach(s => s.style.display = 'none');
+            document.getElementById('more-main-menu').style.display = 'grid';
+        }
+
+        function changeStatementFilter(filterType) {
+            currentFilter = filterType;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-' + filterType).classList.add('active');
+            const titles = { daily: "দৈনিক স্টেটমেন্ট", monthly: "মাসিক স্টেটমেন্ট (গ্রুপ)", yearly: "বাৎসরিক স্টেটমেন্ট (গ্রুপ)" };
+            document.getElementById('statement-title').innerText = "📊 বিস্তারিত " + titles[filterType];
+            renderFilteredStatement();
+        }
+
+        function saveTransaction(e, type) {
+            e.preventDefault();
+            const date = document.getElementById(type === 'income' ? 'inc-date' : 'exp-date').value;
+            const method = document.getElementById(type === 'income' ? 'inc-method' : 'exp-method').value;
+            const amount = parseFloat(document.getElementById(type === 'income' ? 'inc-amount' : 'exp-amount').value);
+            const note = document.getElementById(type === 'income' ? 'inc-note' : 'exp-note').value;
+
+            appData.transactions.push({ id: Date.now(), type, date, method, amount, note });
+            saveData();
+            e.target.reset();
+            switchPage('home');
+        }
+
+        function saveMember(e) {
+            e.preventDefault();
+            const date = document.getElementById('m-date').value;
+            const name = document.getElementById('m-name').value;
+            const father = document.getElementById('m-father').value;
+            const phone = document.getElementById('m-phone').value;
+            const address = document.getElementById('m-address').value;
+            const rate = document.getElementById('m-rate').value;
+            const amount = parseFloat(document.getElementById('m-amount').value);
+
+            appData.members.push({ id: Date.now(), date, name, father, phone, address, rate, amount });
+            saveData();
+            e.target.reset();
+            closeSubSection();
+            switchPage('home');
+        }
+
+        // ডিলিট সিস্টেম ফিক্সড অ্যান্ড সিঙ্কড লজিক (১০০% ফিক্সড)
+        function deleteTx(id) {
+            if(confirm('রেকর্ডটি মুছে ফেলতে চান?')) {
+                appData.transactions = appData.transactions.filter(t => t.id !== id);
+                saveData();
+            }
+        }
+
+        function deleteMember(id) {
+            if(confirm('সদস্যকে বাদ দিতে চান?')) {
+                appData.members = appData.members.filter(m => m.id !== id);
+                saveData();
+            }
+        }
+
+        function updateDashboard() {
+            let balances = { fund: 0, nagad: 0, bank: 0, bkash: 0 };
+            let currentMonthIncome = 0; let currentMonthExpense = 0; let totalPaonadar = 0;
+            const now = new Date();
+            const currentYearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+            appData.transactions.forEach(t => {
+                const isCurrentMonth = t.date.startsWith(currentYearMonth);
+                if (t.type === 'income') {
+                    balances[t.method] += t.amount; if(isCurrentMonth) currentMonthIncome += t.amount;
+                } else {
+                    balances[t.method] -= t.amount; if(isCurrentMonth) currentMonthExpense += t.amount;
+                }
+            });
+
+            appData.members.forEach(m => { totalPaonadar += m.amount; });
+            let totalMainBalance = balances.fund + balances.nagad + balances.bank + balances.bkash + totalPaonadar;
+            let remainingThisMonth = currentMonthIncome - currentMonthExpense;
+
+            document.getElementById('main-balance').innerText = `৳ ${totalMainBalance.toLocaleString('bn-BD')}`;
+            document.getElementById('b-fund').innerText = `৳ ${balances.fund.toLocaleString('bn-BD')}`;
+            document.getElementById('b-nagad').innerText = `৳ ${balances.nagad.toLocaleString('bn-BD')}`;
+            document.getElementById('b-bank').innerText = `৳ ${balances.bank.toLocaleString('bn-BD')}`;
+            document.getElementById('b-bkash').innerText = `৳ ${balances.bkash.toLocaleString('bn-BD')}`;
+            document.getElementById('total-paonadar').innerText = `৳ ${totalPaonadar.toLocaleString('bn-BD')}`;
+            document.getElementById('total-members').innerText = `${appData.members.length} জন`;
+            document.getElementById('m-income').innerText = `৳ ${currentMonthIncome.toLocaleString('bn-BD')}`;
+            document.getElementById('m-expense').innerText = `৳ ${currentMonthExpense.toLocaleString('bn-BD')}`;
+            document.getElementById('m-remaining').innerText = `৳ ${remainingThisMonth.toLocaleString('bn-BD')}`;
+
+            const recentTbody = document.getElementById('table-recent-tbody');
+            recentTbody.innerHTML = '';
+            const totalLogs = [...appData.transactions].reverse();
+            if(totalLogs.length === 0) {
+                recentTbody.innerHTML = '<tr><td colspan="6" style="color:var(--text-light); padding:12px;">কোনো রেকর্ড নেই</td></tr>';
+            } else {
+                totalLogs.forEach((t, index) => {
+                    recentTbody.innerHTML += `<tr><td>${index+1}</td><td style="text-align:left; font-weight:600;">${t.note}</td><td>${t.date}</td><td><span style="font-size:11px; background:#e2e8f0; padding:2px 5px; border-radius:4px; font-weight:bold; color:var(--primary); text-transform:uppercase;">${t.method}</span></td><td style="color:${t.type==='income'?'var(--success)':'var(--danger)'}; font-weight:bold;">${t.type==='income'?'+':'-'}৳${t.amount}</td><td><button type="button" class="delete-icon-btn" onclick="deleteTx(${t.id})">🗑</button></td></tr>`;
+                });
+            }
+
+            const memberTbody = document.getElementById('table-member-tbody');
+            memberTbody.innerHTML = '';
+            if(appData.members.length === 0) {
+                memberTbody.innerHTML = '<tr><td colspan="7" style="color:var(--text-light); padding:12px;">কোনো সদস্য নেই</td></tr>';
+            } else {
+                appData.members.forEach((m, index) => {
+                    memberTbody.innerHTML += `<tr><td>${index + 1}</td><td>${m.date || 'N/A'}</td><td style="text-align:left;"><strong>${m.name}</strong><br><small style="color:var(--text-light)">পিতা: ${m.father || 'N/A'}</small></td><td style="text-align:left;">${m.address}<br><small style="color:var(--text-light)">মোব: ${m.phone || 'N/A'}</small></td><td>৳${m.rate}</td><td style="font-weight:bold; color:var(--primary);">৳${m.amount}</td><td><button type="button" class="delete-icon-btn" onclick="deleteMember(${m.id})">🗑</button></td></tr>`;
+                });
+            }
+            if(document.getElementById('sec-statement').style.display === 'block') renderFilteredStatement();
+        }
+
+        function renderFilteredStatement() {
+            const stmtTbody = document.getElementById('table-statement-tbody');
+            stmtTbody.innerHTML = '';
+            const logs = [...appData.transactions].reverse();
+            if(logs.length === 0) {
+                stmtTbody.innerHTML = '<tr><td colspan="5" style="color:var(--text-light); padding:15px;">কোনো বিবরণী নেই</td></tr>'; return;
+            }
+            if (currentFilter === 'daily') {
+                logs.forEach((t, index) => {
+                    stmtTbody.innerHTML += `<tr><td>${index + 1}</td><td style="text-align:left; font-weight:600;">${t.note}</td><td>${t.date}</td><td style="text-transform:uppercase; font-weight:bold; font-size:11px;">${t.method}</td><td style="color:${t.type==='income'?'var(--success)':'var(--danger)'}; font-weight:bold;">${t.type==='income'?'+':'-'}৳${t.amount}</td></tr>`;
+                });
+            } else {
+                let grouped = {};
+                logs.forEach(t => {
+                    let key = (currentFilter === 'monthly') ? t.date.substring(0, 7) : t.date.substring(0, 4);
+                    if(!grouped[key]) grouped[key] = { income: 0, expense: 0 };
+                    if(t.type === 'income') grouped[key].income += t.amount; else grouped[key].expense += t.amount;
+                });
+                let idx = 1;
+                for(let period in grouped) {
+                    let net = grouped[period].income - grouped[period].expense;
+                    stmtTbody.innerHTML += `<tr><td>${idx++}</td><td style="text-align:left;font-weight:600;">মোট হিসাব</td><td>${period}</td><td>জমা/খরচ</td><td style="font-weight:bold;">৳${net.toLocaleString('bn-BD')}</td></tr>`;
+                }
+            }
+        }
+
+        window.addEventListener('error', function(event) {
+            console.error('App error:', event.message);
+        });
+    </script>
+
+<!-- Firebase Google Sign-In ও Cloud Sync -->
+<div id="firebase-gate" style="position:fixed;inset:0;z-index:99999;background:#f1f5f9;display:flex;align-items:center;justify-content:center;padding:20px;font-family:inherit;">
+  <div style="background:#fff;width:100%;max-width:390px;padding:24px;border-radius:16px;box-shadow:0 8px 30px #0002;text-align:center;">
+    <div style="font-size:42px">🏦</div><h2 style="margin:8px 0;color:#1d4ed8">আমার হিসাব</h2>
+    <p style="font-size:14px;color:#475569">অ্যাপ খুলতে অ্যাডমিন Google অ্যাকাউন্ট দিয়ে প্রবেশ করুন।</p>
+    <button id="firebase-signin" type="button" style="width:100%;padding:13px;border:0;border-radius:8px;background:#1d4ed8;color:white;font-weight:bold;font-size:16px;">Google দিয়ে লগইন</button>
+    <p id="firebase-status" role="status" style="font-size:13px;color:#475569;margin-top:14px;overflow-wrap:anywhere">Firebase সংযোগ প্রস্তুত হচ্ছে…</p>
+  </div>
+</div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+(function(){
+  const ADMIN_EMAIL = 'shafikulpsb@gmail.com';
+  const firebaseConfig = {
+    apiKey: 'AIzaSyBgSd8ZxTi1A3vDNA-N1aKsqhW6EORImJ8',
+    authDomain: 'amar-hisab-276c4.firebaseapp.com',
+    projectId: 'amar-hisab-276c4',
+    storageBucket: 'amar-hisab-276c4.firebasestorage.app',
+    messagingSenderId: '527208106051',
+    appId: '1:527208106051:web:88ce7be2dd96c77241acf6'
+  };
+  const gate=document.getElementById('firebase-gate'), status=document.getElementById('firebase-status'), signInBtn=document.getElementById('firebase-signin');
+  let cloudReady=false, writing=false, saveTimer=null, auth=null, db=null;
+  function say(t){status.textContent=t;}
+  function showGate(){gate.style.display='flex'; document.getElementById('lock-screen').style.display='none';}
+  function hideGate(){gate.style.display='none'; document.getElementById('lock-screen').style.display='flex';}
+  function safeCloudData(){
+    const copy=JSON.parse(JSON.stringify(appData || {}));
+    delete copy.logo; // বড় base64 লোগো ক্লাউড ডকুমেন্টে না রেখে এই ডিভাইসে রাখা হয়
+    return copy;
+  }
+  async function saveCloud(){
+    if(!cloudReady || writing || !auth.currentUser) return;
+    writing=true;
+    try { await db.collection('users').doc(auth.currentUser.uid).set({appData:safeCloudData(),updatedAt:firebase.firestore.FieldValue.serverTimestamp(),email:ADMIN_EMAIL},{merge:true}); }
+    catch(e){say('ক্লাউডে সংরক্ষণ হয়নি: '+(e.code||e.message)+'। Firestore Rules পরীক্ষা করুন।');}
+    finally{writing=false;}
+  }
+  // মূল অ্যাপের saveData রাখা হচ্ছে; এর সাথে ক্লাউড সংরক্ষণ যোগ করা হলো।
+  const originalSaveData=window.saveData;
+  window.saveData=function(){
+    if(typeof originalSaveData==='function') originalSaveData();
+    clearTimeout(saveTimer); saveTimer=setTimeout(saveCloud,500);
+  };
+  async function acceptUser(user){
+    if(!user){cloudReady=false;showGate();say('অ্যাডমিন Gmail দিয়ে লগইন করুন।');return;}
+    if((user.email||'').toLowerCase()!==ADMIN_EMAIL || !user.emailVerified){
+      cloudReady=false; await auth.signOut(); showGate(); say('এই Gmail অনুমোদিত নয়। '+ADMIN_EMAIL+' দিয়ে লগইন করুন।'); return;
+    }
+    showGate(); signInBtn.disabled=true; say('আপনার হিসাবের ডেটা লোড হচ্ছে…');
+    try{
+      const ref=db.collection('users').doc(user.uid), snap=await ref.get();
+      if(snap.exists && snap.data().appData){
+        const cloudData=snap.data().appData;
+        // ডিভাইসের লোগো অক্ষত রাখুন; বাকি হিসাব ক্লাউড থেকে নিন
+        const localLogo=(appData && appData.logo)||'';
+        appData=Object.assign({},appData,cloudData,{logo:localLogo});
+        localStorage.setItem('amar_hisab_db',JSON.stringify(appData));
+        if(typeof updateDashboard==='function') updateDashboard();
+      } else {
+        await ref.set({appData:safeCloudData(),updatedAt:firebase.firestore.FieldValue.serverTimestamp(),email:ADMIN_EMAIL});
+      }
+      cloudReady=true; hideGate(); say('ক্লাউড সংযুক্ত');
+    }catch(e){cloudReady=false;showGate();say('ডেটা লোড হয়নি: '+(e.code||e.message)+'। Firebase Firestore Rules সেট করুন।');}
+    finally{signInBtn.disabled=false;}
+  }
+  signInBtn.addEventListener('click',async function(){
+    try{
+      signInBtn.disabled=true; say('Google লগইন খুলছে…');
+      const provider=new firebase.auth.GoogleAuthProvider(); provider.setCustomParameters({login_hint:ADMIN_EMAIL});
+      await auth.signInWithPopup(provider);
+    }catch(e){
+      // Redirect sign-in is intentionally disabled: embedded/local previews can lose
+      // browser session state. Run this page from an HTTPS-hosted domain for Google auth.
+      say('লগইন হয়নি: '+(e.code||e.message)+'। অ্যাপটি HTTPS ওয়েব ঠিকানা থেকে খুলে আবার চেষ্টা করুন।');
+      signInBtn.disabled=false;
+    }
+  });
+  try{
+    firebase.initializeApp(firebaseConfig); auth=firebase.auth(); db=firebase.firestore();
+    auth.onAuthStateChanged(acceptUser);
+  }catch(e){say('Firebase চালু হয়নি: '+e.message);}
+  // লগআউট হলে Firebase থেকেও বের করুন
+  const oldLogout=window.logout;
+  window.logout=function(){cloudReady=false; if(auth) auth.signOut().catch(()=>{}); showGate();};
+})();
+</script>
+
+</body>
+</html>
