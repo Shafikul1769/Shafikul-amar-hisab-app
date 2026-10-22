@@ -236,6 +236,9 @@
                 <div class="more-box" onclick="showSubSection('sec-statement')">📊 ফিল্টার স্টেটমেন্ট</div>
                 <div class="more-box" onclick="showSubSection('sec-note')">📝 আমার নোট</div>
                 <div class="more-box" onclick="showSubSection('sec-password')" style="grid-column: span 2;">🔐 পাসওয়ার্ড পরিবর্তন</div>
+                <div class="more-box" onclick="backupMyData()">⬇️ ডেটা ব্যাকআপ</div>
+                <div class="more-box" onclick="document.getElementById('restore-backup-file').click()">⬆️ ব্যাকআপ রিস্টোর</div>
+                <input id="restore-backup-file" type="file" accept=".json,application/json" style="display:none" onchange="restoreMyData(event)">
             </div>
 
             <!-- সদস্য যোগ -->
@@ -431,6 +434,69 @@
                 appData.pin = newPin; saveData(); alert('পাসওয়ার্ড সফলভাবে পরিবর্তন হয়েছে!'); closeSubSection();
             } else { alert('পাসওয়ার্ড ন্যূনতম ৪ অক্ষরের হতে হবে।'); }
             document.getElementById('new-pin').value = '';
+        }
+
+        // JSON backup/restore: export all local app data, including transactions, members and notes.
+        function backupMyData() {
+            try {
+                const payload = {
+                    app: 'আমার হিসাব',
+                    formatVersion: 1,
+                    exportedAt: new Date().toISOString(),
+                    data: appData
+                };
+                const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                const stamp = new Date().toISOString().slice(0, 10);
+                a.href = url;
+                a.download = 'amar-hishab-backup-' + stamp + '.json';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+                alert('ব্যাকআপ ফাইল ডাউনলোড শুরু হয়েছে। Downloads ফোল্ডারে JSON ফাইলটি রাখুন।');
+            } catch (e) {
+                alert('ব্যাকআপ করা যায়নি: ' + (e.message || e));
+            }
+        }
+
+        function restoreMyData(event) {
+            const input = event.target;
+            const file = input.files && input.files[0];
+            if (!file) return;
+            if (!confirm('রিস্টোর করলে এই ফোনের বর্তমান হিসাব ব্যাকআপ ফাইলের তথ্য দিয়ে বদলে যাবে। আগে বর্তমান ডেটার ব্যাকআপ নিয়েছেন কি?')) {
+                input.value = '';
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function () {
+                try {
+                    const parsed = JSON.parse(String(reader.result || ''));
+                    const restored = parsed && parsed.data ? parsed.data : parsed;
+                    if (!restored || typeof restored !== 'object' || !Array.isArray(restored.transactions) || !Array.isArray(restored.members)) {
+                        throw new Error('এটি আমার হিসাবের সঠিক ব্যাকআপ ফাইল নয়।');
+                    }
+                    if (!confirm('নিশ্চিত করবেন? বর্তমান ফোনের হিসাব প্রতিস্থাপন হবে।')) {
+                        input.value = '';
+                        return;
+                    }
+                    appData = restored;
+                    localStorage.setItem('amar_hisab_db', JSON.stringify(appData));
+                    if (typeof saveData === 'function') saveData();
+                    if (typeof updateDashboard === 'function') updateDashboard();
+                    const note = document.getElementById('app-personal-note');
+                    if (note) note.value = appData.personalNote || '';
+                    alert('ব্যাকআপ রিস্টোর হয়েছে। অ্যাপটি আবার খুলে দেখুন।');
+                    location.reload();
+                } catch (e) {
+                    alert('রিস্টোর করা যায়নি: ' + (e.message || e));
+                } finally {
+                    input.value = '';
+                }
+            };
+            reader.onerror = function () { alert('ব্যাকআপ ফাইল পড়া যায়নি।'); input.value = ''; };
+            reader.readAsText(file);
         }
 
         function saveData() {
@@ -671,14 +737,15 @@
       const provider=new firebase.auth.GoogleAuthProvider(); provider.setCustomParameters({login_hint:ADMIN_EMAIL});
       await auth.signInWithPopup(provider);
     }catch(e){
-      // Redirect sign-in is intentionally disabled: embedded/local previews can lose
-      // browser session state. Run this page from an HTTPS-hosted domain for Google auth.
-      say('লগইন হয়নি: '+(e.code||e.message)+'। অ্যাপটি HTTPS ওয়েব ঠিকানা থেকে খুলে আবার চেষ্টা করুন।');
-      signInBtn.disabled=false;
+      if(e.code==='auth/popup-blocked' || e.code==='auth/operation-not-supported-in-this-environment'){
+        try{await auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());return;}catch(er){e=er;}
+      }
+      say('লগইন হয়নি: '+(e.code||e.message)); signInBtn.disabled=false;
     }
   });
   try{
     firebase.initializeApp(firebaseConfig); auth=firebase.auth(); db=firebase.firestore();
+    auth.getRedirectResult().catch(e=>say('Google লগইন সমস্যা: '+(e.code||e.message)));
     auth.onAuthStateChanged(acceptUser);
   }catch(e){say('Firebase চালু হয়নি: '+e.message);}
   // লগআউট হলে Firebase থেকেও বের করুন
