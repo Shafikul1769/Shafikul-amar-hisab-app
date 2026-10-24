@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
         <!-- PWA Manifest ও লোগো লিংক -->
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" type="image/png" sizes="192x192" href="logo.png">
-    <link rel="apple-touch-icon" href="logo.png">
+    <link rel="manifest" href="./manifest.json?v=2">
+    <link rel="icon" type="image/png" sizes="192x192" href="./logo-192.png?v=2">
+    <link rel="apple-touch-icon" href="./logo-192.png?v=2">
     <meta name="theme-color" content="#025732">
 
     <!-- সার্ভিস ওয়ার্কার রেজিস্টার স্ক্রিপ্ট -->
     <script>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js')
+        navigator.serviceWorker.register('./sw.js?v=2', {scope: './'})
           .then(reg => console.log('Service Worker Registered!', reg))
           .catch(err => console.log('Service Worker Error:', err));
       }

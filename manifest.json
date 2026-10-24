@@ -1,17 +1,27 @@
 {
+  "id": "./",
+  "name": "আমার হিসাব — শফিকুল ইসলাম",
   "short_name": "আমার হিসাব",
-  "name": "আমার হিসাব - অগ্রণী ব্যাংক থিম",
+  "description": "ব্যক্তিগত জমা-খরচ ও পাওনাদারের হিসাব",
+  "lang": "bn-BD",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f1f5f9",
+  "theme_color": "#025732",
   "icons": [
     {
-      "src": "logo.png",
-      "type": "image/png",
+      "src": "./logo-192.png?v=2",
       "sizes": "192x192",
-      "purpose": "any maskable"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./logo-512.png?v=2",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
     }
-  ],
-  "start_url": "./index.html",
-  "background_color": "#004B23",
-  "theme_color": "#004B23",
-  "display": "standalone",
-  "orientation": "portrait"
+  ]
 }
