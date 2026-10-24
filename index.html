@@ -2,6 +2,20 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
+        <!-- PWA Manifest ও লোগো লিংক -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="logo.png">
+    <link rel="apple-touch-icon" href="logo.png">
+    <meta name="theme-color" content="#025732">
+
+    <!-- সার্ভিস ওয়ার্কার রেজিস্টার স্ক্রিপ্ট -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('Service Worker Registered!', reg))
+          .catch(err => console.log('Service Worker Error:', err));
+      }
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>আমার হিসাব - অগ্রণী ব্যাংক থিম (শতভাগ ফিক্সড)</title>
     <style>
