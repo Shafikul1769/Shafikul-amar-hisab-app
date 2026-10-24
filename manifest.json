@@ -1,0 +1,17 @@
+{
+  "short_name": "আমার হিসাব",
+  "name": "আমার হিসাব - অগ্রণী ব্যাংক থিম",
+  "icons": [
+    {
+      "src": "logo.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "./index.html",
+  "background_color": "#004B23",
+  "theme_color": "#004B23",
+  "display": "standalone",
+  "orientation": "portrait"
+}
